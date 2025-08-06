@@ -41,7 +41,7 @@ namespace ShootEmUp
             }
         }
 
-        public void FlyBulletByArgs(Args args)
+        public void CreateBulletByArgs(Args args)
         {
             if (this.m_bulletPool.TryDequeue(out var bullet))
             {
@@ -52,12 +52,7 @@ namespace ShootEmUp
                 bullet = Instantiate(this.prefab, this.worldTransform);
             }
 
-            bullet.SetPosition(args.position);
-            bullet.SetColor(args.color);
-            bullet.SetPhysicsLayer(args.physicsLayer);
-            bullet.damage = args.damage;
-            bullet.isPlayer = args.isPlayer;
-            bullet.SetVelocity(args.velocity);
+            bullet.Initialize(args);
             
             if (this.m_activeBullets.Add(bullet))
             {

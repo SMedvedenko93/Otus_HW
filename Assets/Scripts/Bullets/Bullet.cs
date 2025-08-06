@@ -40,5 +40,15 @@ namespace ShootEmUp
         {
             this.spriteRenderer.color = color;
         }
+
+        public void Initialize(BulletSystem.Args args)
+        {
+            this.SetPosition(args.position);
+            this.SetColor(args.color);
+            this.SetPhysicsLayer(args.physicsLayer);
+            this.damage = args.damage;
+            this.isPlayer = args.isPlayer;
+            this.SetVelocity(args.velocity);
+        }
     }
 }

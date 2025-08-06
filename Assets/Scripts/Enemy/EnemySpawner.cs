@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyPool : MonoBehaviour
+    public sealed class EnemySpawner : MonoBehaviour
     {
         [Header("Spawn")]
         [SerializeField]
@@ -21,6 +21,9 @@ namespace ShootEmUp
 
         [SerializeField]
         private GameObject prefab;
+
+        [SerializeField]
+        private BulletSystem bulletSystem;
 
         private readonly Queue<GameObject> enemyPool = new();
         
@@ -40,15 +43,16 @@ namespace ShootEmUp
                 return null;
             }
 
-            enemy.transform.SetParent(this.worldTransform);
+            EnemyController enemyController = enemy.GetComponent<EnemyController>();
 
-            var spawnPosition = this.enemyPositions.RandomSpawnPosition();
-            enemy.transform.position = spawnPosition.position;
-            
-            var attackPosition = this.enemyPositions.RandomAttackPosition();
-            enemy.GetComponent<EnemyMoveAgent>().SetDestination(attackPosition.position);
+            enemyController.Initialize(
+                this.worldTransform,
+                this.enemyPositions.RandomSpawnPosition(),
+                this.enemyPositions.RandomAttackPosition(),
+                this.character,
+                bulletSystem
+                );
 
-            enemy.GetComponent<EnemyAttackAgent>().SetTarget(this.character);
             return enemy;
         }
 
