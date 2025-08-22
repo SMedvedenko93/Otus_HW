@@ -2,16 +2,22 @@
 
 namespace ShootEmUp
 {
+    [RequireComponent(typeof(EnemyMoveAgent))]
+    [RequireComponent(typeof(EnemyAttackAgent))]
+    [RequireComponent(typeof(ShootComponent))]
+    [RequireComponent(typeof(WeaponComponent))]
     public class EnemyController : MonoBehaviour
     {
+        private EnemyAttackAgent enemyAttackAgent => GetComponent<EnemyAttackAgent>();
+
         private void OnEnable()
         {
-            this.GetComponent<EnemyAttackAgent>().OnFire += this.OnFire;
+            this.enemyAttackAgent.OnFire += this.OnFire;
         }
 
         private void OnDisable()
         {
-            this.GetComponent<EnemyAttackAgent>().OnFire -= this.OnFire;
+            this.enemyAttackAgent.OnFire -= this.OnFire;
         }
 
         public void Initialize(Transform worldTransform, Transform enemySpawnPositions, Transform enemyAttackPositions, GameObject character, BulletSystem bulletSystem)

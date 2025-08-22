@@ -238,6 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bdb5771141e4cf18c434a69ec116e09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  magnitute: 0.25
   moveComponent: {fileID: 5568771391735819372}
 --- !u!114 &6896809305229427933
 MonoBehaviour:
@@ -267,6 +268,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletConfig: {fileID: 11400000, guid: c67e51724b2e8e548a0f167c53fbc43e, type: 2}
+  bulletSystem: {fileID: 0}
+  isPlayer: 0
 --- !u!1 &2239154907127902911
 GameObject:
   m_ObjectHideFlags: 0
