@@ -7,7 +7,6 @@ namespace ShootEmUp
     public sealed class EnemyAttackAgent : MonoBehaviour
     {
         public delegate void FireHandler();
-
         public event Action OnFire;
 
         [SerializeField] private WeaponComponent weaponComponent;
