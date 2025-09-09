@@ -6,6 +6,7 @@ namespace ShootEmUp
     [RequireComponent(typeof(EnemyAttackAgent))]
     [RequireComponent(typeof(ShootComponent))]
     [RequireComponent(typeof(WeaponComponent))]
+
     public class EnemyController : MonoBehaviour
     {
         private EnemyAttackAgent enemyAttackAgent => GetComponent<EnemyAttackAgent>();

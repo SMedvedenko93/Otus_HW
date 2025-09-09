@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemySpawner : MonoBehaviour
+    public sealed class EnemySpawner : MonoBehaviour, IStartGameListener, IPauseGameListener, IResumeGameListener, IFinishGameListener
     {
         [Header("Spawn")]
         [SerializeField] private EnemyPositions enemyPositions;
@@ -17,7 +17,8 @@ namespace ShootEmUp
         [SerializeField] private BulletSystem bulletSystem;
 
         private readonly Queue<GameObject> enemyPool = new();
-        
+        private bool isActive;
+
         private void Awake()
         {
             for (var i = 0; i < spawnCount; i++)
@@ -29,6 +30,9 @@ namespace ShootEmUp
 
         public GameObject SpawnEnemy()
         {
+            if (!isActive)
+                return null;
+
             if (!this.enemyPool.TryDequeue(out var enemy))
             {
                 return null;
@@ -51,6 +55,26 @@ namespace ShootEmUp
         {
             enemy.transform.SetParent(this.container);
             this.enemyPool.Enqueue(enemy);
+        }
+
+        public void StartGame()
+        {
+            isActive = true;
+        }
+
+        public void PauseGame()
+        {
+            isActive = false;
+        }
+
+        public void ResumeGame()
+        {
+            isActive = true;
+        }
+
+        public void FinishGame()
+        {
+            isActive = false;
         }
     }
 }
