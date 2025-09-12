@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class InputManager : MonoBehaviour
+    public sealed class InputManager : MonoBehaviour, IGameUpdateListener
     {
         public float HorizontalDirection { get; private set; }
         public event Action OnFirePressed;
         public event Action<float> OnHorizontalMovement;
 
-        private void Update()
+        public void CustomUpdate(float deltaTime)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -29,7 +29,7 @@ namespace ShootEmUp
                 this.HorizontalDirection = 0;
             }
 
-            if(this.HorizontalDirection != 0)
+            if (this.HorizontalDirection != 0)
                 OnHorizontalMovement?.Invoke(this.HorizontalDirection);
         }
     }

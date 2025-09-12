@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class BulletSystem : MonoBehaviour
+    public sealed class BulletSystem : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFixedUpdateListener
     {
         [SerializeField] private int initialCount = 50;
         
@@ -15,8 +15,8 @@ namespace ShootEmUp
         private readonly Queue<Bullet> bulletPool = new();
         private readonly HashSet<Bullet> activeBullets = new();
         private readonly List<Bullet> cache = new();
-        
-        private void Awake()
+
+        void IGameStartListener.StartGame()
         {
             for (var i = 0; i < this.initialCount; i++)
             {
@@ -25,7 +25,7 @@ namespace ShootEmUp
             }
         }
         
-        private void FixedUpdate()
+        void IGameFixedUpdateListener.CustomFixedUpdate(float fixedDeltaTime)
         {
             this.cache.Clear();
             this.cache.AddRange(this.activeBullets);
@@ -52,7 +52,8 @@ namespace ShootEmUp
             }
 
             bullet.Initialize(args);
-            
+
+
             if (this.activeBullets.Add(bullet))
             {
                 bullet.OnCollisionEntered += this.OnBulletCollision;
@@ -74,7 +75,23 @@ namespace ShootEmUp
                 this.bulletPool.Enqueue(bullet);
             }
         }
-        
+
+        void IGamePauseListener.PauseGame()
+        {
+            foreach (var activeBullet in activeBullets)
+            {
+                activeBullet.GetComponent<Bullet>().PauseGame();
+            }
+        }
+
+        void IGameResumeListener.ResumeGame()
+        {
+            foreach (var activeBullet in activeBullets)
+            {
+                activeBullet.GetComponent<Bullet>().ResumeGame();
+            }
+        }
+
         public struct Args
         {
             public Vector2 position;

@@ -5,7 +5,7 @@ namespace ShootEmUp
     [RequireComponent(typeof(MoveComponent))]
     [RequireComponent(typeof(ShootComponent))]
     [RequireComponent(typeof(HitPointsComponent))]
-    public sealed class CharacterController : MonoBehaviour, IStartGameListener, IPauseGameListener, IResumeGameListener, IFinishGameListener
+    public sealed class CharacterController : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener
     {
         [SerializeField] private GameObject character;
         [SerializeField] private GameManager gameManager;
@@ -16,20 +16,6 @@ namespace ShootEmUp
 
         private bool isActive;
         
-        private void OnEnable()
-        {
-            this.hitPointsComponent.OnHealthEmpted += this.OnCharacterDeath;
-            this.inputManager.OnHorizontalMovement += Move;
-            this.inputManager.OnFirePressed += OnFire;
-        }
-
-        private void OnDisable()
-        {
-            this.hitPointsComponent.OnHealthEmpted -= this.OnCharacterDeath;
-            this.inputManager.OnHorizontalMovement -= Move;
-            this.inputManager.OnFirePressed -= OnFire;
-        }
-
         private void OnCharacterDeath(GameObject _)
         {
             this.gameManager.FinishGame();
@@ -37,8 +23,11 @@ namespace ShootEmUp
 
         private void OnFire()
         {
-            var weapon = this.character.GetComponent<WeaponComponent>();
-            this.shootComponent.Fire(weapon);
+            if (isActive)
+            {
+                var weapon = this.character.GetComponent<WeaponComponent>();
+                this.shootComponent.Fire(weapon);
+            }
         }
 
         private void Move(float direction)
@@ -49,24 +38,30 @@ namespace ShootEmUp
             }
         }
 
-        public void StartGame()
+        void IGameStartListener.StartGame()
         {
             isActive = true;
+            this.hitPointsComponent.OnHealthEmpted += this.OnCharacterDeath;
+            this.inputManager.OnHorizontalMovement += Move;
+            this.inputManager.OnFirePressed += OnFire;
         }
 
-        public void PauseGame()
+        void IGamePauseListener.PauseGame()
         {
             isActive = false;
         }
 
-        public void ResumeGame()
+        void IGameResumeListener.ResumeGame()
         {
             isActive = true;
         }
 
-        public void FinishGame()
+        void IGameFinishListener.FinishGame()
         {
             isActive = false;
+            this.hitPointsComponent.OnHealthEmpted -= this.OnCharacterDeath;
+            this.inputManager.OnHorizontalMovement -= Move;
+            this.inputManager.OnFirePressed -= OnFire;
         }
     }
 }

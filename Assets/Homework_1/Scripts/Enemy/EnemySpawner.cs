@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemySpawner : MonoBehaviour, IStartGameListener, IPauseGameListener, IResumeGameListener, IFinishGameListener
+    public sealed class EnemySpawner : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener
     {
         [Header("Spawn")]
         [SerializeField] private EnemyPositions enemyPositions;
@@ -18,15 +18,6 @@ namespace ShootEmUp
 
         private readonly Queue<GameObject> enemyPool = new();
         private bool isActive;
-
-        private void Awake()
-        {
-            for (var i = 0; i < spawnCount; i++)
-            {
-                var enemy = Instantiate(this.prefab, this.container);
-                this.enemyPool.Enqueue(enemy);
-            }
-        }
 
         public GameObject SpawnEnemy()
         {
@@ -48,6 +39,8 @@ namespace ShootEmUp
                 bulletSystem
                 );
 
+            enemyController.StartGame();
+
             return enemy;
         }
 
@@ -57,22 +50,35 @@ namespace ShootEmUp
             this.enemyPool.Enqueue(enemy);
         }
 
-        public void StartGame()
+        void IGameStartListener.StartGame()
         {
             isActive = true;
+            for (var i = 0; i < spawnCount; i++)
+            {
+                var enemy = Instantiate(this.prefab, this.container);
+                this.enemyPool.Enqueue(enemy);
+            }  
         }
 
-        public void PauseGame()
+        void IGamePauseListener.PauseGame()
         {
             isActive = false;
+            foreach (GameObject enemy in enemyPool)
+            {
+                enemy.GetComponent<EnemyController>().PauseGame();
+            }
         }
 
-        public void ResumeGame()
+        void IGameResumeListener.ResumeGame()
         {
             isActive = true;
+            foreach (GameObject enemy in enemyPool)
+            {
+                enemy.GetComponent<EnemyController>().ResumeGame();
+            }
         }
 
-        public void FinishGame()
+        void IGameFinishListener.FinishGame()
         {
             isActive = false;
         }

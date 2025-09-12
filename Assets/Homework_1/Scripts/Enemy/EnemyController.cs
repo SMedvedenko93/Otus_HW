@@ -7,19 +7,10 @@ namespace ShootEmUp
     [RequireComponent(typeof(ShootComponent))]
     [RequireComponent(typeof(WeaponComponent))]
 
-    public class EnemyController : MonoBehaviour
+    public class EnemyController : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener
     {
         private EnemyAttackAgent enemyAttackAgent => GetComponent<EnemyAttackAgent>();
-
-        private void OnEnable()
-        {
-            this.enemyAttackAgent.OnFire += this.OnFire;
-        }
-
-        private void OnDisable()
-        {
-            this.enemyAttackAgent.OnFire -= this.OnFire;
-        }
+        private bool isActive;
 
         public void Initialize(Transform worldTransform, Transform enemySpawnPositions, Transform enemyAttackPositions, GameObject character, BulletSystem bulletSystem)
         {
@@ -28,11 +19,40 @@ namespace ShootEmUp
             this.GetComponent<EnemyMoveAgent>().SetDestination(enemyAttackPositions.position);
             this.GetComponent<EnemyAttackAgent>().SetTarget(character);
             this.GetComponent<ShootComponent>().SetBulletSystem(bulletSystem);
+
+            this.GetComponent<EnemyMoveAgent>().StartGame();
         }
 
         private void OnFire()
         {
-            this.GetComponent<ShootComponent>().Fire(GetComponent<WeaponComponent>());
+            if (isActive)
+            {
+                this.GetComponent<ShootComponent>().Fire(GetComponent<WeaponComponent>());
+            } 
+        }
+
+        public void StartGame()
+        {
+            isActive = true;
+            this.enemyAttackAgent.OnFire += this.OnFire;
+        }
+
+        public void PauseGame()
+        {
+            isActive = false;
+            this.GetComponent<EnemyMoveAgent>().PauseGame();
+        }
+
+        public void ResumeGame()
+        {
+            isActive = true;
+            this.GetComponent<EnemyMoveAgent>().ResumeGame();
+        }
+
+        public void FinishGame()
+        {
+            isActive = false;
+            this.enemyAttackAgent.OnFire -= this.OnFire;
         }
     }
 }

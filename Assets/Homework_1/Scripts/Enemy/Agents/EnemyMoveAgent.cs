@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour, IStartGameListener, IPauseGameListener, IResumeGameListener, IFinishGameListener
+    public sealed class EnemyMoveAgent : MonoBehaviour, IGameFixedUpdateListener, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener
     {
         public bool IsReached
         {
@@ -21,7 +21,7 @@ namespace ShootEmUp
             this.isReached = false;
         }
 
-        private void FixedUpdate()
+        public void CustomFixedUpdate(float fixedDeltaTime)
         {
             if (this.isReached)
             {

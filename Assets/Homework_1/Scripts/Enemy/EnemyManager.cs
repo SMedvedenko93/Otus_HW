@@ -5,13 +5,14 @@ using UnityEngine;
 namespace ShootEmUp
 {
     [RequireComponent(typeof(HitPointsComponent))]
-    public sealed class EnemyManager : MonoBehaviour
+    public sealed class EnemyManager : MonoBehaviour, IGameFixedUpdateListener, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFinishListener
     {
         [SerializeField] private EnemySpawner enemySpawner;
         [SerializeField] private int respawnTime;
-        private readonly HashSet<GameObject> activeEnemies = new();
+        [SerializeField] private readonly HashSet<GameObject> activeEnemies = new();
+        private Coroutine spawnCoroutine;
 
-        private IEnumerator Start()
+        private IEnumerator StartSpawn()
         {
             while (true)
             {
@@ -36,5 +37,39 @@ namespace ShootEmUp
             }
         }
 
+        void IGameStartListener.StartGame()
+        {
+            spawnCoroutine = StartCoroutine(StartSpawn());
+        }
+
+        void IGameFinishListener.FinishGame()
+        {
+            StopCoroutine(spawnCoroutine);
+        }
+
+        void IGamePauseListener.PauseGame()
+        {
+            foreach (GameObject enemy in activeEnemies)
+            {
+                enemy.GetComponent<EnemyController>().PauseGame();
+            }
+        }
+
+        void IGameResumeListener.ResumeGame()
+        {
+            foreach (GameObject enemy in activeEnemies)
+            {
+                enemy.GetComponent<EnemyController>().ResumeGame();
+            }
+        }
+
+        public void CustomFixedUpdate(float fixedDeltaTime)
+        {
+            foreach (GameObject enemy in activeEnemies)
+            {
+                enemy.GetComponent<EnemyMoveAgent>().CustomFixedUpdate(fixedDeltaTime);
+                enemy.GetComponent<EnemyAttackAgent>().CustomFixedUpdate(fixedDeltaTime);
+            }
+        }
     }
 }

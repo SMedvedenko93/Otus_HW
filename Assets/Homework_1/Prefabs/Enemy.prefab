@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidbody2D: {fileID: 659620479434099170}
-  speed: 7
+  speed: 5
 --- !u!114 &5568771391735819373
 MonoBehaviour:
   m_ObjectHideFlags: 0

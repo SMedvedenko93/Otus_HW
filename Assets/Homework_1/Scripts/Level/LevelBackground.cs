@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class LevelBackground : MonoBehaviour
+    public sealed class LevelBackground : MonoBehaviour, IGameStartListener, IGamePauseListener, IGameResumeListener, IGameFixedUpdateListener
     {
         private float startPositionY;
         private float endPositionY;
@@ -11,22 +11,15 @@ namespace ShootEmUp
         private float positionX;
         private float positionZ;
         private Transform myTransform;
+        private bool isActive;
 
         [SerializeField] private Params m_params;
 
-        private void Awake()
+        public void CustomFixedUpdate(float fixedDeltaTime)
         {
-            this.startPositionY = this.m_params.m_startPositionY;
-            this.endPositionY = this.m_params.m_endPositionY;
-            this.movingSpeedY = this.m_params.m_movingSpeedY;
-            this.myTransform = this.transform;
-            var position = this.myTransform.position;
-            this.positionX = position.x;
-            this.positionZ = position.z;
-        }
+            if (!isActive)
+                return;
 
-        private void FixedUpdate()
-        {
             if (this.myTransform.position.y <= this.endPositionY)
             {
                 this.myTransform.position = new Vector3(
@@ -38,10 +31,33 @@ namespace ShootEmUp
 
             this.myTransform.position -= new Vector3(
                 this.positionX,
-                this.movingSpeedY * Time.fixedDeltaTime,
+                this.movingSpeedY * fixedDeltaTime,
                 this.positionZ
             );
         }
+
+        public void PauseGame()
+        {
+            isActive = false;
+        }
+
+        public void ResumeGame()
+        {
+            isActive = true;
+        }
+
+        public void StartGame()
+        {
+            this.startPositionY = this.m_params.m_startPositionY;
+            this.endPositionY = this.m_params.m_endPositionY;
+            this.movingSpeedY = this.m_params.m_movingSpeedY;
+            this.myTransform = this.transform;
+            var position = this.myTransform.position;
+            this.positionX = position.x;
+            this.positionZ = position.z;
+            isActive = true;
+        }
+
 
         [Serializable]
         public sealed class Params

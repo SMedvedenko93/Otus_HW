@@ -13,27 +13,41 @@ public class GameCycle : MonoBehaviour
 {
     private GameState _gameState;
 
-    private List<IStartGameListener> startGameListeners = new();
-    private List<IPauseGameListener> pauseGameListeners = new();
-    private List<IResumeGameListener> resumeGameListeners = new();
-    private List<IFinishGameListener> finishGameListeners = new();
+    private List<IGameUpdateListener> gameUpdateListeners = new();
+    private List<IGameFixedUpdateListener> gameFixedUpdateListeners = new();
+    private List<IGameLateUpdateListener> gameLateUpdateListeners = new();
 
-    public void AddListener(IGameEventLister listener)
+    private List<IGameStartListener> gameStartListeners = new();
+    private List<IGamePauseListener> gamePauseListeners = new();
+    private List<IGameResumeListener> gameResumeListeners = new();
+    private List<IGameFinishListener> gameFinishListeners = new();
+     
+    public GameState GameState => _gameState;
+
+    public void AddListener(IGameListener listener)
     {
-        if(listener is IStartGameListener startGameListener)
-            startGameListeners.Add(startGameListener);
+        if(listener is IGameStartListener gameStartListener)
+            gameStartListeners.Add(gameStartListener);
 
-        if (listener is IPauseGameListener pauseGameListener)
-            pauseGameListeners.Add(pauseGameListener);
+        if (listener is IGamePauseListener gamePauseListener)
+            gamePauseListeners.Add(gamePauseListener);
 
-        if (listener is IResumeGameListener resumeGameListener)
-            resumeGameListeners.Add(resumeGameListener);
+        if (listener is IGameResumeListener gameResumeListener)
+            gameResumeListeners.Add(gameResumeListener);
 
-        if (listener is IFinishGameListener finishGameListener)
-            finishGameListeners.Add(finishGameListener);
+        if (listener is IGameFinishListener gameFinishListener)
+            gameFinishListeners.Add(gameFinishListener);
+
+        if (listener is IGameUpdateListener gameUpdateListener)
+            gameUpdateListeners.Add(gameUpdateListener);
+
+        if (listener is IGameFixedUpdateListener gameFixedUpdateListener)
+            gameFixedUpdateListeners.Add(gameFixedUpdateListener);
+
+        if (listener is IGameLateUpdateListener gameLateUpdateListener)
+            gameLateUpdateListeners.Add(gameLateUpdateListener);
     }
 
-    [ContextMenu("Start Game")]
     public void StartGame()
     {
         if (_gameState == GameState.Playing)
@@ -41,13 +55,12 @@ public class GameCycle : MonoBehaviour
 
         _gameState = GameState.Playing;
 
-        foreach (IStartGameListener listener in startGameListeners)
+        foreach (IGameStartListener listener in gameStartListeners)
         {
             listener.StartGame();
         }
     }
 
-    [ContextMenu("Pause Game")]
     public void PauseGame()
     {
         if (_gameState == GameState.Paused)
@@ -55,13 +68,12 @@ public class GameCycle : MonoBehaviour
 
         _gameState = GameState.Paused;
 
-        foreach (IPauseGameListener listener in pauseGameListeners)
+        foreach (IGamePauseListener listener in gamePauseListeners)
         {
             listener.PauseGame();
         }
     }
 
-    [ContextMenu("Resume Game")]
     public void ResumeGame()
     {
         if (_gameState != GameState.Paused)
@@ -69,14 +81,12 @@ public class GameCycle : MonoBehaviour
 
         _gameState = GameState.Playing;
 
-
-        foreach (IResumeGameListener listener in resumeGameListeners)
+        foreach (IGameResumeListener listener in gameResumeListeners)
         {
             listener.ResumeGame();
         }
     }
 
-    [ContextMenu("Finish Game")]
     public void FinishGame()
     {
         if (_gameState == GameState.Finished)
@@ -84,10 +94,36 @@ public class GameCycle : MonoBehaviour
 
         _gameState = GameState.Finished;
 
-
-        foreach (IFinishGameListener listener in finishGameListeners)
+        foreach (IGameFinishListener listener in gameFinishListeners)
         {
             listener.FinishGame();
+        }
+    }
+
+    private void Update()
+    {
+        var deltaTime = Time.deltaTime;
+        foreach (IGameUpdateListener listener in gameUpdateListeners)
+        {
+            listener.CustomUpdate(deltaTime);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        var fixedDeltaTime = Time.fixedDeltaTime;
+        foreach (IGameFixedUpdateListener listener in gameFixedUpdateListeners)
+        {
+            listener.CustomFixedUpdate(fixedDeltaTime);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        var deltaTime = Time.deltaTime;
+        foreach (IGameLateUpdateListener listener in gameLateUpdateListeners)
+        {
+            listener.CustomLateUpdate(deltaTime);
         }
     }
 }
