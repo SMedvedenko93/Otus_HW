@@ -1,13 +1,9 @@
 using UnityEngine;
-using Zenject;
 
-public class GameBootstrapper : MonoBehaviour, IInitializable
+namespace ShootEmUpZenject
 {
-    public void Initialize()
+    public class GameBootstrapper : MonoBehaviour
     {
-        //UnityEngine.Debug.Log("GameBootstrapper");
-        //_saveSystem.Load();
-        //_uiSystem.Init();
-        //_eventBus.Publish(new GameInitializedEvent());
+
     }
 }
