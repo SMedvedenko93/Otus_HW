@@ -4,27 +4,27 @@ using Zenject;
 
 namespace ShootEmUpZenject
 {
-    public class CharacterSystem : IFixedTickable, IDamageable, IDisposable
+    public class PlayerSystem : IFixedTickable, IDisposable
     {
-        private CharacterConfig _config;
+        private readonly EventBus _eventBus;
+        private PlayerConfig _config;
         private IMovable _movement;
-        private AttackSystem _attackSystem;
+        private IAttackSystem _attackSystem;
         private IInputService _inputService;
+        private float _health;
+        public event Action PlayerDeath;
 
         [Inject]
-        public CharacterSystem(
-            CharacterConfig config,
-            IMovable movement,
-            AttackSystem attackSystem,
-            IInputService inputService
-            )
+        public PlayerSystem(PlayerConfig config, IMovable movement, IAttackSystem attackSystem, IInputService inputService, EventBus eventBus)
         {
+            _eventBus = eventBus;
             _config = config;
             _movement = movement;
             _attackSystem = attackSystem;
             _inputService = inputService;
 
             _inputService.OnFirePressed += Attack;
+            _health = _config.BaseHealth;
         }
 
         private void Attack()
@@ -34,7 +34,11 @@ namespace ShootEmUpZenject
 
         public void TakeDamage(int damage)
         {
-
+            _health -= damage;
+            if (_health <= 0)
+            {
+                _eventBus.Invoke(new PlayerDiedSignal());
+            }
         }
 
         public void FixedTick()
@@ -49,4 +53,6 @@ namespace ShootEmUpZenject
             _inputService.OnFirePressed -= Attack;
         }
     }
+
+    public struct PlayerDiedSignal { }
 }

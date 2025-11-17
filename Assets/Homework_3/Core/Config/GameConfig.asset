@@ -9,10 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53b75c32636e92e49847a691cf9338d4, type: 3}
-  m_Name: CharacterConfig
+  m_Script: {fileID: 11500000, guid: fa767d8e83fdac04ea9d291097226ffb, type: 3}
+  m_Name: GameConfig
   m_EditorClassIdentifier: 
-  BaseDamage: 5
-  BaseHealth: 50
-  BaseSpeed: 5
-  SpawnPosition: {x: 0, y: -3.5, z: 0}
+  BulletPoolCount: 30
+  BulletPrefab: {fileID: 8135455043906081561, guid: 5e7702a495ead5b42b858260a1f50183,
+    type: 3}

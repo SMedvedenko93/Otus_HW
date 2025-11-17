@@ -1,5 +1,5 @@
+using ShootEmUp;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Zenject;
 
 namespace ShootEmUpZenject
@@ -10,51 +10,72 @@ namespace ShootEmUpZenject
         [SerializeField] private Transform _canvas;
 
 
-        [FormerlySerializedAs("_config")][SerializeField] private CharacterConfig _characterConfig;
-        [SerializeField] private Character _characterPrefab;
+        [SerializeField] private GameConfig _gameConfig;
+        [SerializeField] private PlayerConfig _playerConfig;
+        [SerializeField] private GameObject _playerPrefab;
 
         [SerializeField] private EnemySpawnerConfig _enemySpawnerConfig;
         [SerializeField] private Transform _enemiesRoot;
-        [SerializeField] private EnemyView _enemyPrefab;
+        [SerializeField] private GameObject _enemyPrefab;
 
         public override void InstallBindings()
         {
-            Container.Bind<Transform>().WithId("GameWorld").FromInstance(_gameWorld).AsCached();
-            Container.Bind<Transform>().WithId("Canvas").FromInstance(_canvas).AsCached();
+            Container.Bind<EventBus>().AsSingle().NonLazy();
+
+            Container.Bind<Transform>().WithId(Tags.GAMEWORLD).FromInstance(_gameWorld).AsCached();
+            Container.Bind<Transform>().WithId(Tags.CANVAS).FromInstance(_canvas).AsCached();
 
             Container.BindInterfacesTo<KeyboardInputService>().AsSingle();
+            Container.BindInterfacesTo<GameManager>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<BulletManager>().AsSingle();
 
-            CharacterBindings();
+            Container.BindInterfacesAndSelfTo<LevelBounds>().FromComponentInHierarchy().AsSingle();
+
+            PlayerBindings();
             EnemyBindings();
 
             Container.BindInterfacesAndSelfTo<GameBootstrapper>().FromNewComponentOnNewGameObject().AsSingle().NonLazy();
         }
 
-        private void CharacterBindings()
+        private void PlayerBindings()
         {
-            Container.Bind<CharacterConfig>().FromInstance(_characterConfig).AsSingle();
-            Character character = Container.InstantiatePrefabForComponent<Character>(_characterPrefab, _characterConfig.SpawnPosition, Quaternion.identity, _gameWorld);
-            Rigidbody2D rigidbody2D = character.GetComponent<Rigidbody2D>();
-            Container.BindInterfacesAndSelfTo<Character>().FromInstance(character);
+            Container.Bind<PlayerConfig>().FromInstance(_playerConfig).AsSingle();
 
-            Container.Bind<IMovable>().To<CharacterMovement>().AsSingle().WithArguments(rigidbody2D);
-            Container.BindInterfacesAndSelfTo<BulletSystem>().AsSingle().NonLazy();
-            Container.BindInterfacesAndSelfTo<AttackSystem>().AsSingle().NonLazy();
-
-            Container.BindInterfacesAndSelfTo<CharacterSystem>().AsSingle().NonLazy();
-
+            Container.Bind<PlayerFacade>()
+                .FromSubContainerResolve()
+                .ByNewPrefabInstaller<PlayerInstaller>(_playerPrefab)
+                .UnderTransform(_gameWorld)
+                .AsSingle()
+                .NonLazy();
         }
 
         private void EnemyBindings()
         {
             Container.Bind<EnemySpawnerConfig>().FromInstance(_enemySpawnerConfig).AsSingle();
+            Container.Bind<GameConfig>().FromInstance(_gameConfig).AsSingle();
             Container.BindInterfacesAndSelfTo<EnemySpawner>().AsSingle();
             Container.BindInterfacesAndSelfTo<EnemyManager>().AsSingle();
+            
+            Container.BindFactory<Vector3, Vector3, EnemyFacade, EnemyFacade.Factory>()
+                .FromPoolableMemoryPool<Vector3, Vector3, EnemyFacade, EnemyFacadePool>(poolBinder => poolBinder
+                    .WithInitialSize(_enemySpawnerConfig.EnemyCount)
+                    .FromSubContainerResolve()
+                    .ByNewPrefabInstaller<EnemyInstaller>(_enemyPrefab)
+                    .UnderTransform(_enemiesRoot));
 
-            Container.BindMemoryPool<EnemyView, Enemy.Pool>()
-                .WithFixedSize(_enemySpawnerConfig.EnemyCount)
-                .FromComponentInNewPrefab(_enemyPrefab)
-                .UnderTransform(_enemiesRoot);
+            Container.BindFactory<Vector3, Vector3, int, BulletType, Bullet, Bullet.Factory>()
+                .FromPoolableMemoryPool<Vector3, Vector3, int, BulletType, Bullet, BulletPool>(poolBinder => poolBinder
+                    .WithInitialSize(_gameConfig.BulletPoolCount)
+                    .FromComponentInNewPrefab(_gameConfig.BulletPrefab)
+                    .UnderTransformGroup(Tags.BULLETS));
+        }
+
+        class EnemyFacadePool : MonoPoolableMemoryPool<Vector3, Vector3, IMemoryPool, EnemyFacade>
+        {
+        }
+
+        class BulletPool : MonoPoolableMemoryPool<Vector3, Vector3, int, BulletType, IMemoryPool, Bullet>
+        {
         }
     }
 }

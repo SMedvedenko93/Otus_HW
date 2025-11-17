@@ -12,8 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d528fed0a0d8d924e9cdd3574530f13a, type: 3}
   m_Name: EnemySpawnerConfig
   m_EditorClassIdentifier: 
+  AttackCountDown: 2
   EnemyCount: 7
   respawnTime: 2
+  BaseHealth: 3
+  BaseSpeed: 7
+  BaseMagnitute: 0.25
   spawnPositions:
   - {x: -5, y: 12, z: 0}
   - {x: -3, y: 12, z: 0}
@@ -33,3 +37,8 @@ MonoBehaviour:
   - {x: 1.1, y: 2.93, z: 0}
   - {x: -0.44, y: 1.33, z: 0}
   - {x: -2.51, y: 2.27, z: 0}
+  BulletDirection: {x: 0, y: -1}
+  BulletSpeed: 2
+  BulletDamage: 1
+  BulletPhysicsLayer: 13
+  BulletColor: {r: 0.6886792, g: 0, b: 0.24780737, a: 1}

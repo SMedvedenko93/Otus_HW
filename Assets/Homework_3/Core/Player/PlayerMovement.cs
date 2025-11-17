@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Zenject;
 
 namespace ShootEmUpZenject
 {
@@ -6,6 +7,7 @@ namespace ShootEmUpZenject
     {
         public Rigidbody2D _rigidbody2D;
 
+        [Inject]
         public CharacterMovement(Rigidbody2D rigidbody2D)
         {
             _rigidbody2D = rigidbody2D;

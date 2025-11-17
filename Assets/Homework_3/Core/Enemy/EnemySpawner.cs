@@ -1,4 +1,3 @@
-using ShootEmUp;
 using UnityEngine;
 using Zenject;
 
@@ -6,20 +5,24 @@ namespace ShootEmUpZenject
 {
     public class EnemySpawner : ITickable
     {
-        private readonly Enemy.Pool _pool;
+        readonly EnemyFacade.Factory _enemyFactory;
         private readonly EnemySpawnerConfig _enemySpawnerConfig;
         private float _timer;
+        int _enemyCount;
 
         [Inject]
-        public EnemySpawner(Enemy.Pool pool, EnemySpawnerConfig enemySpawnerConfig)
+        public EnemySpawner(
+            EnemySpawnerConfig enemySpawnerConfig,
+            EnemyFacade.Factory enemyFactory
+            )
         {
-            _pool = pool;
+            _enemyFactory = enemyFactory;
             _enemySpawnerConfig = enemySpawnerConfig;
         }
 
         public void Tick()
         {
-            if (_pool.NumActive >= _enemySpawnerConfig.EnemyCount)
+            if (_enemyCount >= _enemySpawnerConfig.EnemyCount)
                 return;
 
             _timer += Time.deltaTime;
@@ -28,8 +31,15 @@ namespace ShootEmUpZenject
                 _timer = 0f;
                 var spawnPosition = RandomSpawnPosition();
                 var attackPosition = RandomAttackPosition();
-                _pool.Spawn(spawnPosition, attackPosition);
+                var enemyFacade = _enemyFactory.Create(spawnPosition, attackPosition);
+                enemyFacade.EnemyDeath += OnEnemyKilled;
+                _enemyCount++;
             }
+        }
+
+        void OnEnemyKilled()
+        {
+            _enemyCount--;
         }
 
         private Vector3 RandomPosition(Vector3[] positions)
